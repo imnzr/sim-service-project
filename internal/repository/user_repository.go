@@ -21,6 +21,12 @@ type UserRepositoryImplementation struct {
 	db *sql.DB
 }
 
+func NewUserRepository(db *sql.DB) UserRepository {
+	return &UserRepositoryImplementation{
+		db: db,
+	}
+}
+
 // GetUserById implements UserRepository.
 func (u *UserRepositoryImplementation) GetUserById(ctx context.Context, id uint) (*models.User, error) {
 	query := "SELECT id, username, email, password FROM `users` WHERE id = ?"
@@ -94,10 +100,4 @@ func (u *UserRepositoryImplementation) CreateUser(ctx context.Context, user *mod
 
 	user.ID = uint(LastInsertID)
 	return nil
-}
-
-func NewUserRepository(db *sql.DB) UserRepository {
-	return &UserRepositoryImplementation{
-		db: db,
-	}
 }
