@@ -13,3 +13,14 @@ func SetupUserRoutes(app *fiber.App, userControlller controller.UserController, 
 		authGroup.Get("/profile", authMiddleware, userControlller.GetProfile)
 	}
 }
+
+func SetupProductRoutes(app *fiber.App, productController controller.ProductController, authMiddleware fiber.Handler) {
+	productGroup := app.Group("/product")
+	{
+		productGroup.Get("/services", productController.GetProductAvailable)
+		productGroup.Post("/sync-services", productController.SyncFromSimServices)
+		// purchase
+		// status order
+		// order otp
+	}
+}
