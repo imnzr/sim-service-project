@@ -23,10 +23,13 @@ func main() {
 
 	// Inisialisasi Repository
 	userRepository := repository.NewUserRepository(db)
+	userProduct := repository.NewProductRepository(db)
 	// Inisialisasi Service
 	userService := service.NewUserService(userRepository, cfg)
+	productService := service.NewProductService(userProduct)
 	// Inisialisasi Controller
 	userController := controller.NewUserController(userService)
+	productController := controller.NewProductController(productService)
 
 	app := fiber.New()
 
@@ -35,6 +38,7 @@ func main() {
 
 	// Routes
 	routes.SetupUserRoutes(app, userController, authMiddleware)
+	routes.SetupProductRoutes(app, productController, authMiddleware)
 
 	log.Printf("Server starting on port %s", cfg.AppPort)
 	err := app.Listen(":" + cfg.AppPort)
