@@ -9,10 +9,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/imnzr/sim-service-project/config"
 	"github.com/imnzr/sim-service-project/internal/repository"
 	"github.com/imnzr/sim-service-project/models"
 	"github.com/imnzr/sim-service-project/utils"
+	"github.com/redis/go-redis/v9"
 )
 
 type ProductInformation struct {
@@ -28,16 +31,36 @@ type ProductService interface {
 
 type ProductServiceImplementation struct {
 	Repo repository.ProductRepository
+	Cfg  config.AppConfig
 }
 
-func NewProductService(repo repository.ProductRepository) ProductService {
+func NewProductService(repo repository.ProductRepository, cfg config.AppConfig) ProductService {
 	return &ProductServiceImplementation{
 		Repo: repo,
+		Cfg:  cfg,
 	}
 }
 
 // GetProductAvailable implements ProductService.
-func (*ProductServiceImplementation) GetProductAvailable(service string, country string, operator string) (map[string]ProductInformation, error) {
+func (serv *ProductServiceImplementation) GetProductAvailable(service string, country string, operator string) (map[string]ProductInformation, error) {
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     serv.Cfg.RedisURL,
+		Password: serv.Cfg.RedisPassword,
+		DB:       0,
+	})
+
+	cacheKey := fmt.Sprintf("service_product:%s:%s:%s", service, country, operator)
+
+	cacheData, err := redisClient.Get(context.Background(), cacheKey).Result()
+
+	if err == nil {
+		var cacheResult map[string]ProductInformation
+		if err := json.Unmarshal([]byte(cacheData), &cacheResult); err == nil {
+			fmt.Println("cache hit:", cacheKey)
+			return cacheResult, nil
+		}
+	}
+
 	url := fmt.Sprintf("%sguest/products/%s/%s/%s", os.Getenv("SIM_API_URL_SERVICE"), service, country, operator)
 
 	req, err := utils.NewRequestSIM("GET", url, nil)
@@ -66,6 +89,12 @@ func (*ProductServiceImplementation) GetProductAvailable(service string, country
 		return nil, fmt.Errorf("failed to decode product JSON: %w", err)
 	}
 
+	serialized, err := json.Marshal(result)
+	if err == nil {
+		_ = redisClient.Set(context.Background(), cacheKey, serialized, 5*time.Minute)
+	}
+
+	fmt.Println("cache miss: data fetched and cached")
 	return result, nil
 }
 

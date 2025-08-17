@@ -24,3 +24,10 @@ func SetupProductRoutes(app *fiber.App, productController controller.ProductCont
 		// order otp
 	}
 }
+
+func SetupSimOrderRoutes(app *fiber.App, controller controller.OrderController, authMiddleware fiber.Handler) {
+	orderGroup := app.Group("/sim-order")
+	orderGroup.Post("/create", authMiddleware, controller.CreateOrder)
+	// orderGroup.Get("/status/:orderId", authMiddleware, controller.CheckOrderServiceStatus)
+	orderGroup.Post("/webhook", controller.HandleWebhook)
+}

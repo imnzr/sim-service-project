@@ -12,7 +12,7 @@ func NewRequestSIM(method, url string, body io.Reader) (*http.Request, error) {
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("SIM_API_KEY_SERVICE"))
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("SERVICE_API_KEY"))
 	req.Header.Set("Accept", "application/json")
 	return req, nil
 }

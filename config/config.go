@@ -9,8 +9,6 @@ import (
 )
 
 type AppConfig struct {
-	// XenditApiKey         string
-	// XenditCallbackToken  string
 	SimServiceAPIKey     string
 	SimUrlDefault        string
 	AppPort              string
@@ -18,6 +16,8 @@ type AppConfig struct {
 	AccessTokenDuration  time.Duration
 	RefreshTokenDuration time.Duration
 	DatabaseURL          string
+	RedisURL             string
+	RedisPassword        string
 }
 
 func LoadConfig() *AppConfig {
@@ -27,13 +27,13 @@ func LoadConfig() *AppConfig {
 	}
 
 	cfg := &AppConfig{
-		// XenditApiKey: os.Getenv("XENDIT_API_KEY"),
-		// XenditCallbackToken: os.Getenv(),
-		SimServiceAPIKey: os.Getenv("SIM_API_KEY_SERVICE"),
-		SimUrlDefault:    os.Getenv("SIM_API_URL_SERVICE"),
+		SimServiceAPIKey: os.Getenv("SERVICE_API_KEY"),
+		SimUrlDefault:    os.Getenv("SERVICE_API_URL"),
 		AppPort:          os.Getenv("APP_PORT"),
 		JWTSecretKey:     os.Getenv("JWT_SECRET_KEY"),
 		DatabaseURL:      os.Getenv("DATABASE_URL"),
+		RedisURL:         os.Getenv("REDIS_URL"),
+		RedisPassword:    os.Getenv("REDIS_PASSWORD"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -44,6 +44,9 @@ func LoadConfig() *AppConfig {
 	}
 	if cfg.SimUrlDefault == "" {
 		log.Fatal("SIM_API_URL_SERVICE environment variable not set")
+	}
+	if cfg.RedisURL == "" {
+		log.Fatal("REDIS_URL environment variable not set")
 	}
 
 	return cfg

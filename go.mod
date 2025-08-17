@@ -10,8 +10,11 @@ require (
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gofiber/utils v0.0.10 // indirect
 	github.com/gorilla/schema v1.1.0 // indirect
+	github.com/redis/go-redis/v9 v9.12.0 // indirect
 )
 
 require (
@@ -28,5 +31,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
+	github.com/xendit/xendit-go/v4 v4.3.0
+	github.com/xendit/xendit-go/v7 v7.0.0
 	golang.org/x/sys v0.34.0 // indirect
 )

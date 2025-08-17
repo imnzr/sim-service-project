@@ -9,6 +9,7 @@ import (
 	"github.com/imnzr/sim-service-project/database"
 	"github.com/imnzr/sim-service-project/internal/controller"
 	"github.com/imnzr/sim-service-project/internal/middleware"
+	xenditpayment "github.com/imnzr/sim-service-project/internal/payment_gateway/xendit_payment"
 	"github.com/imnzr/sim-service-project/internal/repository"
 	"github.com/imnzr/sim-service-project/internal/service"
 	"github.com/imnzr/sim-service-project/routes"
@@ -24,12 +25,18 @@ func main() {
 	// Inisialisasi Repository
 	userRepository := repository.NewUserRepository(db)
 	userProduct := repository.NewProductRepository(db)
+	orderRepository := repository.NewOrderRepository(db)
+
 	// Inisialisasi Service
 	userService := service.NewUserService(userRepository, cfg)
-	productService := service.NewProductService(userProduct)
+	orderService := service.NewOrderService(orderRepository, db)
+	productService := service.NewProductService(userProduct, *cfg)
+	xenditService := xenditpayment.NewXenditPayment(userRepository, orderRepository)
+
 	// Inisialisasi Controller
 	userController := controller.NewUserController(userService)
 	productController := controller.NewProductController(productService)
+	xenditController := controller.NewOrderController(orderRepository, orderService, xenditService)
 
 	app := fiber.New()
 
@@ -39,6 +46,7 @@ func main() {
 	// Routes
 	routes.SetupUserRoutes(app, userController, authMiddleware)
 	routes.SetupProductRoutes(app, productController, authMiddleware)
+	routes.SetupSimOrderRoutes(app, xenditController, authMiddleware)
 
 	log.Printf("Server starting on port %s", cfg.AppPort)
 	err := app.Listen(":" + cfg.AppPort)
